@@ -2,7 +2,6 @@
 
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
-require 'active_interactor/version'
 
 RSpec::Core::RakeTask.new(:rspec)
 

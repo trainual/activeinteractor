@@ -1,153 +1,55 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+RSpec.describe 'A Basic Interactor', type: %i[integration interactor] do
+  let(:interactor) do
+    build_interactor('ABasicInteractor') do
+      argument :name, String, 'A name'
+      returns :name, String, 'A name'
 
-RSpec.describe 'A basic interactor', type: :integration do
-  let(:interactor_class) do
-    build_interactor do
-      def perform
-        context.test_field = 'test'
+      def resolve
+        output.name = input.name
       end
     end
-  end
-
-  include_examples 'a class with interactor methods'
-  include_examples 'a class with interactor callback methods'
-  include_examples 'a class with interactor context methods'
-
-  describe '.context_class' do
-    subject { interactor_class.context_class }
-
-    it { is_expected.to eq TestInteractor::Context }
-    it { is_expected.to be < ActiveInteractor::Context::Base }
   end
 
   describe '.perform' do
-    subject { interactor_class.perform }
+    subject(:perform) { interactor.perform(name: name) }
 
-    it { is_expected.to be_a ActiveInteractor::Interactor::Result }
-    it { is_expected.to be_successful }
-    it { is_expected.to have_attributes(test_field: 'test') }
-  end
+    context 'when given valid input arguments' do
+      let(:name) { 'test' }
 
-  describe '.perform!' do
-    subject { interactor_class.perform! }
+      xit { is_expected.to be_a ActiveInteractor::Result }
+      xit { is_expected.to be_successful }
 
-    it { expect { subject }.not_to raise_error }
-    it { is_expected.to be_a ActiveInteractor::Interactor::Result }
-    it { is_expected.to be_successful }
-    it { is_expected.to have_attributes(test_field: 'test') }
-  end
+      xit 'returns a valid context with expected attributes' do
+        context = perform.context
 
-  context 'having #context_attributes :test_field' do
-    let(:interactor_class) do
-      build_interactor do
-        context_attributes :test_field
-
-        def perform
-          context.test_field = 'test'
-          context.some_other_field = 'test 2'
-        end
+        expect(context.valid?).to eq true
+        expect(context.name).to eq name
+        expect(context[:name]).to eq name
       end
     end
 
-    include_examples 'a class with interactor methods'
-    include_examples 'a class with interactor callback methods'
-    include_examples 'a class with interactor context methods'
+    context 'when given invalid input arguments' do
+      let(:name) { 1 }
 
-    describe '.perform' do
-      subject(:result) { interactor_class.perform }
+      xit { is_expected.to be_a ActiveInteractor::Result }
+      xit { is_expected.to be_failure }
 
-      it { is_expected.to be_a ActiveInteractor::Interactor::Result }
-      it { is_expected.to be_successful }
-      it { is_expected.to have_attributes(test_field: 'test', some_other_field: 'test 2') }
+      xit 'returns an invalid context with expected attributes' do
+        context = perform.context
 
-      describe '.attributes' do
-        subject { result.attributes }
-
-        it { is_expected.to eq(test_field: 'test') }
-      end
-    end
-  end
-
-  context 'having a .name "AnInteractor"' do
-    let(:interactor_class) { build_interactor('AnInteractor') }
-
-    context 'having a class defined named "AnInteractorContext"' do
-      let!(:context_class) { build_context('AnInteractorContext') }
-
-      describe '.context_class' do
-        subject { interactor_class.context_class }
-
-        it { is_expected.to eq AnInteractorContext }
-        it { is_expected.to be < ActiveInteractor::Context::Base }
-      end
-    end
-  end
-
-  context 'with a context class named "ATestContext"' do
-    let!(:context_class) { build_context('ATestContext') }
-
-    context 'with .contextualize_with :a_test_context' do
-      let(:interactor_class) do
-        build_interactor do
-          contextualize_with :a_test_context
-        end
+        expect(context.valid?).to eq false
+        expect(context.name).to eq name
+        expect(context[:name]).to eq name
       end
 
-      describe '.context_class' do
-        subject { interactor_class.context_class }
+      xit 'returns an ActiveModel::Errors instance with expected errors' do
+        errors = perform.errors
 
-        it { is_expected.to eq ATestContext }
-        it { is_expected.to be < ActiveInteractor::Context::Base }
-      end
-    end
-  end
-
-  context 'having default context attributes {:foo => "foo"}' do
-    let(:interactor_class) do
-      build_interactor do
-        context_attribute :foo, default: -> { 'foo' }
-      end
-    end
-
-    describe '.perform' do
-      subject { interactor_class.perform(context_attributes) }
-
-      context 'when no context is passed' do
-        let(:context_attributes) { {} }
-
-        it { is_expected.to have_attributes(foo: 'foo') }
-      end
-
-      context 'when context {:foo => "bar"} is passed' do
-        let(:context_attributes) { { foo: 'bar' } }
-
-        it { is_expected.to have_attributes(foo: 'bar') }
-      end
-    end
-  end
-
-  context 'having default context attributes {:foo => "foo", :bar => "bar"} using the #context_attributes method' do
-    let(:interactor_class) do
-      build_interactor do
-        context_attributes foo: { default: -> { 'foo' } }, bar: { default: -> { 'bar' } }
-      end
-
-      describe '.perform' do
-        subject { interactor_class.perform(context_attributes) }
-
-        context 'when no context is passed' do
-          let(:context_attributes) { {} }
-
-          it { is_expected.to have_attributes(foo: 'foo', bar: 'bar') }
-        end
-
-        context 'when context {:foo => "bar"} is passed' do
-          let(:context_attributes) { { foo: 'bar' } }
-
-          it { is_expected.to have_attributes(foo: 'bar', bar: 'bar') }
-        end
+        expect(errors).to be_a ActiveModel::Errors
+        expect(errors[:name]).not_to be_nil
+        expect(errors[:name].full_messages).to include 'Name must be a String'
       end
     end
   end

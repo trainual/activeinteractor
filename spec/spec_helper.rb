@@ -1,39 +1,20 @@
 # frozen_string_literal: true
 
-begin
-  require 'simplecov'
-  require 'simplecov-lcov'
-
-  SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
-
-  SimpleCov.start do
-    enable_coverage :branch
-    add_filter '/spec/'
-    add_filter '/lib/rails/**/*.rb'
-    track_files '/lib/**/*.rb'
-    formatter SimpleCov::Formatter::MultiFormatter.new([
-                                                         SimpleCov::Formatter::HTMLFormatter,
-                                                         SimpleCov::Formatter::LcovFormatter
-                                                       ])
-  end
-rescue LoadError
-  puts 'Skipping coverage...'
-end
+require_relative 'support/coverage'
+ActiveInteractor::Spec::Coverage.start
 
 require 'bundler/setup'
 require 'active_interactor'
+Dir[File.join(__dir__, 'support', '**', '*.rb')].sort.each { |f| require f }
 
 RSpec.configure do |config|
+  config.include ActiveInteractor::Spec::Helpers::FactoryMethods
+
   # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = 'spec/.rspec_status'
 
-  config.before do
-    # suppress logs in test
-    allow(ActiveInteractor.logger).to receive(:error).and_return(true)
-  end
-
-  config.after(:each) do
-    clean_factories!
+  config.after do
+    ActiveInteractor::Spec::FactoryCollection.clean!
   end
 
   # Disable RSpec exposing methods globally on `Module` and `main`
@@ -46,5 +27,3 @@ RSpec.configure do |config|
   config.order = :random
   Kernel.srand config.seed
 end
-
-Dir[File.join(__dir__, 'support', '**', '*.rb')].sort.each { |f| require f }
