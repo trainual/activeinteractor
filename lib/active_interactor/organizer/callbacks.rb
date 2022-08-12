@@ -56,6 +56,10 @@ module ActiveInteractor
           set_callback(:each_perform, :after, *filters, &block)
         end
 
+        def around_all_perform(*filters, &block)
+          set_callback(:all_perform, :around, *filters, &block)
+        end
+
         # Define a callback to call around each {Organizer::Organize::ClassMethods#organized organized}
         # {ActiveInteractor::Base interactor's} {Interactor::Perform#perform #perform} method call.
         #
@@ -102,6 +106,10 @@ module ActiveInteractor
           set_callback(:each_perform, :around, *filters, &block)
         end
 
+        def around_all_perform(*filters, &block)  
+          set_callback(:all_perform, :around, *filters, &block)
+        end
+
         # Define a callback to call before each {Organizer::Organize::ClassMethods#organized organized}
         # {ActiveInteractor::Base interactor's} {Interactor::Perform#perform #perform} method has been called.
         #
@@ -145,7 +153,7 @@ module ActiveInteractor
 
       def self.included(base)
         base.class_eval do
-          define_callbacks :each_perform
+          define_callbacks :each_perform, :all_perform
         end
       end
     end

@@ -46,11 +46,15 @@ module ActiveInteractor
       # {Interactor::Perform#perform #perform}. An {Base organizer} is expected not to define its own
       # {Interactor::Perform#perform #perform} method in favor of this default implementation.
       def perform
-        if self.class.parallel
-          perform_in_parallel
-        else
-          perform_in_order
+        run_callbacks :all_perform do
+          if self.class.parallel
+            perform_in_parallel
+          else
+            perform_in_order
+          end
         end
+
+        run_after_perform_callbacks_on_interactors
       end
 
       private
@@ -80,6 +84,7 @@ module ActiveInteractor
 
         context.merge!(result)
         context_fail! if result.failure?
+
         interface.execute_inplace_callback(self, :after)
       end
 
@@ -96,6 +101,13 @@ module ActiveInteractor
           Thread.new { execute_interactor_with_callbacks(interface, false, skip_rollback: true) }
         end
         merge_contexts(results.map(&:value))
+      end
+
+      def run_after_perform_callbacks_on_interactors 
+        self.class.organized.each do |interface|
+          return unless interface.interactor_class.defer_after_callbacks_when_organized
+          interface.execute_after_perform_callbacks
+        end
       end
     end
   end

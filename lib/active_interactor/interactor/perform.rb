@@ -14,6 +14,23 @@ module ActiveInteractor
       # @author Aaron Allen <hello@aaronmallen.me>
       # @since 1.0.0
       module ClassMethods
+        def defer_after_callbacks_when_organized
+          self.defer_after_callbacks_when_organized = true
+        end
+
+        def self.extended(base)
+          base.class_eval do
+            class_attribute :is_organized, default: false
+            class_attribute :defer_after_callbacks_when_organized, instance_writer: false, default: false
+          end
+        end
+
+        def self.included(base)
+          base.class_eval do
+            skip_callback :perform, :after, if: -> { self.class.defer_after_callbacks_when_organized && self.class.is_organized }, raise: false
+          end
+        end
+
         # Initialize a new {Base interactor} instance and call its {Interactor::Perform#perform #perform} method. This
         # is the default api to interact with all {Base interactors}.
         #

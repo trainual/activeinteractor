@@ -71,11 +71,20 @@ module ActiveInteractor
 
         method = fail_on_error ? :perform! : :perform
         options = self.perform_options.merge(perform_options)
+        
+        interactor_class.is_organized = true
         interactor_class.send(method, context, options)
       end
 
       def execute_inplace_callback(target, callback)
         resolve_option(target, callbacks[callback])
+      end
+
+      def execute_after_perform_callbacks(context)
+        interactor = interactor_class.new(context)
+        interactor_class._perform_callbacks.select { |cb| cb.kind.eql?(:after) }.reverse.each do |cb|
+          interactor.send(cb)
+        end
       end
 
       private
