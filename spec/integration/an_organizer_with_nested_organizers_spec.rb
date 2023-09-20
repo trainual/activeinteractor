@@ -157,6 +157,14 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
 
   let!(:test_organizer_inner) do
     build_organizer('TestOrganizerInner') do
+      before_perform do
+        context.steps << 'before_perform_organizer_inner_a'
+      end
+
+      before_perform do
+        context.steps << 'before_perform_organizer_inner_b'
+      end
+
       after_perform do
         context.steps << 'after_perform_organizer_inner_a'
       end
@@ -165,18 +173,54 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         context.steps << 'after_perform_organizer_inner_b'
       end
 
+      around_perform :around_perform_a
+      def around_perform_a
+        context.steps << 'around_perform_organizer_inner_a_start'
+        yield
+        context.steps << 'around_perform_organizer_inner_a_end'
+      end
+
+      around_perform :around_perform_b
+      def around_perform_b
+        context.steps << 'around_perform_organizer_inner_b_start'
+        yield
+        context.steps << 'around_perform_organizer_inner_b_end'
+      end
+
       organize TestInteractor3
     end
   end
 
   let!(:test_organizer_middle) do
     build_organizer('TestOrganizerMiddle') do
+      before_perform do
+        context.steps << 'before_perform_organizer_middle_a'
+      end
+
+      before_perform do
+        context.steps << 'before_perform_organizer_middle_b'
+      end
+
       after_perform do
         context.steps << 'after_perform_organizer_middle_a'
       end
 
       after_perform do
         context.steps << 'after_perform_organizer_middle_b'
+      end
+
+      around_perform :around_perform_a
+      def around_perform_a
+        context.steps << 'around_perform_organizer_middle_a_start'
+        yield
+        context.steps << 'around_perform_organizer_middle_a_end'
+      end
+
+      around_perform :around_perform_b
+      def around_perform_b
+        context.steps << 'around_perform_organizer_middle_b_start'
+        yield
+        context.steps << 'around_perform_organizer_middle_b_end'
       end
 
       organize TestOrganizerInner, TestInteractor4
@@ -187,6 +231,11 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
     build_organizer('TestOrganizerOuter') do
       before_perform do
         context.steps = []
+        context.steps << 'before_perform_organizer_outer_a'
+      end
+
+      before_perform do
+        context.steps << 'before_perform_organizer_outer_b'
       end
 
       after_perform do
@@ -195,6 +244,20 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
 
       after_perform do
         context.steps << 'after_perform_organizer_outer_b'
+      end
+
+      around_perform :around_perform_a
+      def around_perform_a
+        context.steps << 'around_perform_organizer_outer_a_start'
+        yield
+        context.steps << 'around_perform_organizer_outer_a_end'
+      end
+
+      around_perform :around_perform_b
+      def around_perform_b
+        context.steps << 'around_perform_organizer_outer_b_start'
+        yield
+        context.steps << 'around_perform_organizer_outer_b_end'
       end
 
       organize TestInteractor1, TestInteractor2, TestOrganizerMiddle
@@ -215,6 +278,12 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
     it { is_expected.to be_successful }
     it { is_expected.to have_attributes(
       steps: [
+        # Organizer Outer (start)
+        'before_perform_organizer_outer_a',
+        'before_perform_organizer_outer_b',
+        'around_perform_organizer_outer_a_start',
+        'around_perform_organizer_outer_b_start',
+
         # Interactor 1
         'before_perform_1a',
         'before_perform_1b',
@@ -237,6 +306,18 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         'after_perform_2b',
         'after_perform_2a',
 
+        # Organizer Middle (start)
+        'before_perform_organizer_middle_a',
+        'before_perform_organizer_middle_b',
+        'around_perform_organizer_middle_a_start',
+        'around_perform_organizer_middle_b_start',
+
+        # Organizer Inner (start)
+        'before_perform_organizer_inner_a',
+        'before_perform_organizer_inner_b',
+        'around_perform_organizer_inner_a_start',
+        'around_perform_organizer_inner_b_start',
+
         # Interactor 3
         'before_perform_3a',
         'before_perform_3b',
@@ -248,7 +329,9 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         'after_perform_3b',
         'after_perform_3a',
 
-        # Organizer Inner
+        # Organizer Inner (end)
+        'around_perform_organizer_inner_b_end',
+        'around_perform_organizer_inner_a_end',
         'after_perform_organizer_inner_b',
         'after_perform_organizer_inner_a',
 
@@ -263,11 +346,15 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         'after_perform_4b',
         'after_perform_4a',
 
-        # Organizer Middle
+        # Organizer Middle (end)
+        'around_perform_organizer_middle_b_end',
+        'around_perform_organizer_middle_a_end',
         'after_perform_organizer_middle_b',
         'after_perform_organizer_middle_a',
 
-        # Organizer Outer
+        # Organizer Outer (end)
+        'around_perform_organizer_outer_b_end',
+        'around_perform_organizer_outer_a_end',
         'after_perform_organizer_outer_b',
         'after_perform_organizer_outer_a',
       ]
