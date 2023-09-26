@@ -338,10 +338,6 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         'around_perform_organizer_inner_a_end',
         'after_perform_organizer_inner_b',
         'after_perform_organizer_inner_a',
-        
-        # Deferred callbacks (inner)
-        'after_perform_3b',
-        'after_perform_3a',
 
         # Interactor 4
         'before_perform_4a',
@@ -355,10 +351,6 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         # Organizer Middle (end)
         'around_perform_organizer_middle_b_end',
         'around_perform_organizer_middle_a_end',
-        
-        # Deferred callbacks (middle)
-        'after_perform_4b',
-        'after_perform_4a',
 
         # Organizer Outer (end)
         'around_perform_organizer_outer_b_end',
@@ -366,9 +358,13 @@ RSpec.describe 'An organizer with a nested organizer with after callbacks deferr
         'after_perform_organizer_outer_b',
         'after_perform_organizer_outer_a',
         
-        # Deferred callbacks (outer)
+        # Deferred callbacks
         'after_perform_1b',
         'after_perform_1a',
+        'after_perform_3b',
+        'after_perform_3a',
+        'after_perform_4b',
+        'after_perform_4a',
         'after_perform_organizer_middle_b',
         'after_perform_organizer_middle_a',
       ]

@@ -51,16 +51,22 @@ module ActiveInteractor
 
       def run_after_perform_callbacks_on_children
         self.class.organized.each do |interface|
-          next unless interface.interactor_class.after_callbacks_deferred_when_organized
+          return if options.organizer.present?
 
-          context.merge!(interface.execute_deferred_after_perform_callbacks(context))
+          if interface.interactor_class <= ActiveInteractor::Organizer::Base
+            context.merge!(interface.interactor_class.organized.execute_deferred_after_perform_callbacks(context))
+          end
+
+          if interface.interactor_class.after_callbacks_deferred_when_organized
+            context.merge!(interface.execute_deferred_after_perform_callbacks(context))
+          end
         end
       end
 
       private
 
       def execute_interactor(interface, fail_on_error = false, perform_options = {})
-        interface.perform(self, context, fail_on_error, perform_options)
+        interface.perform(self, context, fail_on_error, perform_options.merge({ organizer: self }))
       end
 
       def execute_interactor_with_callbacks(interface, fail_on_error = false, perform_options = {})

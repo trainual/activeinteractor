@@ -26,6 +26,16 @@ module ActiveInteractor
         @collection = []
       end
 
+      def execute_deferred_after_perform_callbacks(context)
+        each do |interface|
+          if interface.interactor_class <= ActiveInteractor::Organizer::Base
+            context.merge!(interface.interactor_class.organized.execute_deferred_after_perform_callbacks(context))
+          else
+            context.merge!(interface.execute_deferred_after_perform_callbacks(context))
+          end
+        end
+      end
+
       # Add an {InteractorInterface} to the {#collection}
       #
       # @param interactor_class [Const, Symbol, String] an {ActiveInteractor::Base interactor} class
