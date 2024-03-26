@@ -75,7 +75,7 @@ module ActiveInteractor
       end
 
       def run_deferred_callbacks_on_interactor(interface, context)
-        context.merge!(interface.execute_deferred_after_perform_callbacks(context))
+        context.merge!(interface.execute_deferred_after_perform_callbacks(context, self))
       end
 
       def run_deferred_callbacks_on_children(organizer_interface, context)

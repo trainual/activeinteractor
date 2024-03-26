@@ -88,8 +88,12 @@ module ActiveInteractor
       end
 
       # Executes after_perform callbacks that have been deferred on the interactor
-      def execute_deferred_after_perform_callbacks(context)
+      def execute_deferred_after_perform_callbacks(context, organizer)
         return unless deferred_after_perform_callbacks.present?
+
+        # return if self.filters[:if] == false || self.filters[:unless] == true
+        return if check_conditionals(organizer, :if) == false
+        return if check_conditionals(organizer, :unless) == true
 
         interactor = interactor_class.new(context)
         env = ActiveSupport::Callbacks::Filters::Environment.new(interactor, false, nil)
