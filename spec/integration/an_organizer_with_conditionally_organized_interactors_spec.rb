@@ -208,6 +208,40 @@ RSpec.describe 'An organizer with conditionally organized interactors', type: :i
         expect_any_instance_of(test_interactor_2).to receive(:perform)
         subject
       end
+
+      context 'when the first interactor has a deferred callback' do
+        let!(:test_interactor_1) do
+          build_interactor('TestInteractor1') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
+      end
+
+      context 'when the second interactor has a deferred callback' do
+        let!(:test_interactor_2) do
+          build_interactor('TestInteractor2') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
+      end
     end
   end
 
@@ -246,6 +280,40 @@ RSpec.describe 'An organizer with conditionally organized interactors', type: :i
       it 'is expected to receive #perform on the second interactor' do
         expect_any_instance_of(test_interactor_2).to receive(:perform)
         subject
+      end
+
+      context 'when the first interactor has a deferred callback' do
+        let!(:test_interactor_1) do
+          build_interactor('TestInteractor1') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected not to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_nil
+        end
+      end
+
+      context 'when the second interactor has a deferred callback' do
+        let!(:test_interactor_2) do
+          build_interactor('TestInteractor2') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
       end
     end
   end
@@ -286,6 +354,40 @@ RSpec.describe 'An organizer with conditionally organized interactors', type: :i
         expect_any_instance_of(test_interactor_2).to receive(:perform)
         subject
       end
+
+      context 'when the first interactor has a deferred callback' do
+        let!(:test_interactor_1) do
+          build_interactor('TestInteractor1') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_nil
+        end
+      end
+
+      context 'when the second interactor has a deferred callback' do
+        let!(:test_interactor_2) do
+          build_interactor('TestInteractor2') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
+      end
     end
   end
 
@@ -320,6 +422,40 @@ RSpec.describe 'An organizer with conditionally organized interactors', type: :i
         expect_any_instance_of(test_interactor_1).to receive(:perform)
         expect_any_instance_of(test_interactor_2).to receive(:perform)
         subject
+      end
+
+      context 'when the first interactor has a deferred callback' do
+        let!(:test_interactor_1) do
+          build_interactor('TestInteractor1') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
+      end
+
+      context 'when the second interactor has a deferred callback' do
+        let!(:test_interactor_2) do
+          build_interactor('TestInteractor2') do
+            defer_after_callbacks_when_organized
+
+            after_perform do
+              context.after_perform_was_invoked = true
+            end
+          end
+        end
+
+        it 'is expected to invoke the deferred callback' do
+          result = subject
+          expect(result.after_perform_was_invoked).to be_truthy
+        end
       end
     end
   end
