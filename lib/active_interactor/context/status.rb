@@ -66,7 +66,7 @@ module ActiveInteractor
       # @since 1.0.3
       # @return [self] the instance of {Base context}
       def resolve
-        resolve_errors
+        # resolve_errors
         self
       end
 
