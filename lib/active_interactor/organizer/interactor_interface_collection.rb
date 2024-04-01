@@ -64,7 +64,7 @@ module ActiveInteractor
           if interface.interactor_class <= ActiveInteractor::Organizer::Base
             context.merge!(interface.interactor_class.organized.execute_deferred_after_perform_callbacks(context))
           else
-            context.merge!(interface.execute_deferred_after_perform_callbacks(context))
+            context.merge!(interface.execute_deferred_after_perform_callbacks(context, self))
           end
         end
       end
