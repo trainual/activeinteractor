@@ -37,11 +37,12 @@ module ActiveInteractor
         end
 
         def start_simplecov
+          SimpleCov.formatter(simplecov_formatter)
+
           SimpleCov.start do
             add_filter EXCLUDED_FILES_PATTERN
             enable_coverage :branch
             track_files TRACKED_FILES_PATTERN
-            formatter simplecov_formatter
           end
         end
       end
