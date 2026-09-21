@@ -123,7 +123,9 @@ module ActiveInteractor
         return unless deferred_after_perform_callbacks.present?
 
         deferred_after_perform_callbacks.each do |callback|
-          interactor_class.skip_callback(:perform, :after, callback.filter, raise: false, if: -> { self.options.organizer.present? })
+          interactor_class.skip_callback(
+            :perform, :after, callback.filter, raise: false, if: -> { options.organizer.present? }
+          )
         end
       end
 
