@@ -58,15 +58,31 @@ module ActiveInteractor
         self
       end
 
-      # Executes after_perform callbacks that have been deferred on each organized interactor
-      def execute_deferred_after_perform_callbacks(context)
+      # Executes after_perform callbacks that have been deferred on each organized interactor. Nested
+      # {Base organizers} are walked depth first, and the filters on each {InteractorInterface} are evaluated
+      # against an instance of the {Base organizer} that organized it.
+      #
+      # @param context [Class] an instance of {Context::Base context} to run the callbacks against and merge the
+      #  results into
+      # @param organizer [Class] the {Base organizer} instance that owns this collection
+      # @return [Class] the {Context::Base context} instance
+      def execute_deferred_after_perform_callbacks(context, organizer)
         each do |interface|
-          if interface.interactor_class <= ActiveInteractor::Organizer::Base
-            context.merge!(interface.interactor_class.organized.execute_deferred_after_perform_callbacks(context))
-          else
-            context.merge!(interface.execute_deferred_after_perform_callbacks(context, self))
-          end
+          next unless interface.conditionals_met?(organizer)
+
+          execute_deferred_after_perform_callbacks_on_nested_organizer(interface, context) if interface.organizer?
+
+          result = interface.execute_deferred_after_perform_callbacks(context, organizer)
+          context.merge!(result) if result
         end
+        context
+      end
+
+      private
+
+      def execute_deferred_after_perform_callbacks_on_nested_organizer(interface, context)
+        nested_organizer = interface.interactor_class.new(context)
+        interface.interactor_class.organized.execute_deferred_after_perform_callbacks(context, nested_organizer)
       end
     end
   end

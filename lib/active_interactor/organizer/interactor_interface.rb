@@ -73,8 +73,7 @@ module ActiveInteractor
       #  {Context::Status#fail! fails} its {Context::Base context}.
       # @return [Class] an instance of {Context::Base context}
       def perform(target, context, fail_on_error = false, perform_options = {})
-        return if check_conditionals(target, :if) == false
-        return if check_conditionals(target, :unless) == true
+        return unless conditionals_met?(target)
 
         skip_deferred_after_perform_callbacks
 
@@ -88,15 +87,39 @@ module ActiveInteractor
       end
 
       # Executes after_perform callbacks that have been deferred on the interactor
+      #
+      # @param context [Class] an instance of {Context::Base context}
+      # @param organizer [Class] the {Base organizer} instance that organizes the {#interactor_class}. The
+      #  {#filters} are evaluated against this instance, so it must be an instance of the organizer the
+      #  {#interactor_class} was {Organize::ClassMethods#organize organized} in.
+      # @return [Class, nil] an instance of {Context::Base context} or `nil` if the {#interactor_class} has no
+      #  deferred callbacks or its {#filters} are not met
       def execute_deferred_after_perform_callbacks(context, organizer)
         return unless deferred_after_perform_callbacks.present?
-        return if check_conditionals(organizer, :if) == false
-        return if check_conditionals(organizer, :unless) == true
+        return unless conditionals_met?(organizer)
 
         interactor = interactor_class.new(context)
         env = ActiveSupport::Callbacks::Filters::Environment.new(interactor, false, nil)
         deferred_after_perform_callbacks.compile(nil).invoke_after(env)
         interactor.send(:context)
+      end
+
+      # Whether all conditions in {#filters} are met for the given {Base organizer} instance
+      #
+      # @param target [Class] the {Base organizer} instance the {#filters} are evaluated against
+      # @return [Boolean] `false` if an `:if` filter returns `false` or an `:unless` filter returns `true`
+      def conditionals_met?(target)
+        return false if check_conditionals(target, :if) == false
+        return false if check_conditionals(target, :unless) == true
+
+        true
+      end
+
+      # Whether the {#interactor_class} is an {Organizer::Base organizer}
+      #
+      # @return [Boolean]
+      def organizer?
+        interactor_class <= ActiveInteractor::Organizer::Base
       end
 
       private
