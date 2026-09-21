@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning].
 
 ## [Unreleased]
 
+## [trainual-v1.2.4] - 2026-09-17
+
+### Fixed
+
+- Conditional `if:` / `unless:` filters on a nested organizer's children are now evaluated against an instance of
+  that nested organizer during the deferred after_perform callback sweep, instead of against the internal
+  `InteractorInterfaceCollection`. Proc and Symbol filters that reference `context` or organizer methods no longer
+  raise `NameError` when the organizer is nested via `add`.
+- Filters on a nested organizer interface itself are now honoured during the deferred sweep, so a nested
+  organizer that was skipped during perform no longer has its children's deferred callbacks run.
+- Deferred after_perform callbacks on an organizer nested two or more levels deep now run, instead of being
+  silently dropped.
+- Merging a `nil` result into the context during the deferred sweep no longer clears the context's failure flags.
+
 ## [v1.2.2] - 2023-09-30
 
 ### Fixed
@@ -276,7 +290,8 @@ and this project adheres to [Semantic Versioning].
 
 <!-- versions -->
 
-[Unreleased]: https://github.com/aaronmallen/activeinteractor/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/trainual/activeinteractor/compare/trainual-v1.2.4...HEAD
+[trainual-v1.2.4]: https://github.com/trainual/activeinteractor/compare/trainual-v1.2.3...trainual-v1.2.4
 [v1.2.2]: https://github.com/aaronmallen/activeinteractor/compare/v1.2.1...v1.2.2
 [v1.2.1]: https://github.com/aaronmallen/activeinteractor/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/aaronmallen/activeinteractor/compare/v1.1.7...v1.2.0
